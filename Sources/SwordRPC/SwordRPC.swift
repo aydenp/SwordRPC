@@ -85,6 +85,7 @@ public class SwordRPC {
 
   public func setPresence(_ presence: RichPresence) {
     self.presence = presence
+    updatePresence()
   }
 
   public func reply(to request: JoinRequest, with reply: JoinReply) {

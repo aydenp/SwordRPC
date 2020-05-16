@@ -186,28 +186,24 @@ extension SwordRPC {
   }
 
   func updatePresence() {
-    self.worker.asyncAfter(deadline: .now() + .seconds(15)) { [unowned self] in
-      self.updatePresence()
-
-      guard let presence = self.presence else {
-        return
-      }
-
-      self.presence = nil
-
-      let json = """
-          {
-            "cmd": "SET_ACTIVITY",
-            "args": {
-              "pid": \(self.pid),
-              "activity": \(String(data: try! self.encoder.encode(presence), encoding: .utf8)!)
-            },
-            "nonce": "\(UUID().uuidString)"
-          }
-          """
-
-      try? self.send(json, .frame)
+    guard let presence = self.presence else {
+    return
     }
+
+    self.presence = nil
+
+    let json = """
+      {
+        "cmd": "SET_ACTIVITY",
+        "args": {
+          "pid": \(self.pid),
+          "activity": \(String(data: try! self.encoder.encode(presence), encoding: .utf8)!)
+        },
+        "nonce": "\(UUID().uuidString)"
+      }
+      """
+
+    try? self.send(json, .frame)
   }
 
 }

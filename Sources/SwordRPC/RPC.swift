@@ -159,7 +159,6 @@ extension SwordRPC {
   }
 
   func handleEvent(_ data: [String: Any]) {
-    print(data)
     guard let evt = data["evt"] as? String,
           let event = Event(rawValue: evt) else {
       return

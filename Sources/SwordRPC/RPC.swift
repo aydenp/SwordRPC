@@ -200,18 +200,12 @@ extension SwordRPC {
   }
 
   func updatePresence() {
-    guard let presence = self.presence else {
-    return
-    }
-
-    self.presence = nil
-
     let json = """
       {
         "cmd": "SET_ACTIVITY",
         "args": {
           "pid": \(self.pid),
-          "activity": \(String(data: try! self.encoder.encode(presence), encoding: .utf8)!)
+          "activity": \(presence != nil ? String(data: try! self.encoder.encode(presence), encoding: .utf8)! : "null")
         },
         "nonce": "\(UUID().uuidString)"
       }

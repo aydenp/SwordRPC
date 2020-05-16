@@ -92,7 +92,7 @@ public class SwordRPC {
     return socket?.isConnected ?? false
   }
 
-  public func setPresence(_ presence: RichPresence) {
+  public func setPresence(_ presence: RichPresence?) {
     self.presence = presence
     updatePresence()
   }

@@ -37,7 +37,15 @@ extension SwordRPC {
     buffer.storeBytes(of: op.rawValue, as: UInt32.self)
     buffer.storeBytes(of: UInt32(payload.count), toByteOffset: 4, as: UInt32.self)
 
-    try self.socket?.write(from: buffer.baseAddress!, bufSize: buffer.count)
+    do {
+        try self.socket?.write(from: buffer.baseAddress!, bufSize: buffer.count)
+    } catch let err {
+        if let err = err as? Socket.Error, err.errorReason == "Broken pipe" {
+            // This socket is dead
+            self.disconnect(code: Int(err.errorCode), message: err.errorReason!)
+        }
+        throw err
+    }
   }
 
   func receive() {
@@ -122,6 +130,13 @@ extension SwordRPC {
 
     try? self.send(json, .frame)
   }
+    
+  func disconnect(code: Int, message: String) {
+    guard self.socket?.isConnected ?? false else { return }
+    self.socket?.close()
+    self.disconnectHandler?(self, code, message)
+    self.delegate?.swordRPCDidDisconnect(self, code: code, message: message)
+  }
 
   func handlePayload(_ op: OP, _ json: Data) {
     switch op {
@@ -129,9 +144,7 @@ extension SwordRPC {
       let data = self.decode(json)
       let code = data["code"] as! Int
       let message = data["message"] as! String
-      self.socket?.close()
-      self.disconnectHandler?(self, code, message)
-      self.delegate?.swordRPCDidDisconnect(self, code: code, message: message)
+      self.disconnect(code: code, message: message)
 
     case .ping:
       try? self.send(String(data: json, encoding: .utf8)!, .pong)
@@ -145,6 +158,7 @@ extension SwordRPC {
   }
 
   func handleEvent(_ data: [String: Any]) {
+    print(data)
     guard let evt = data["evt"] as? String,
           let event = Event(rawValue: evt) else {
       return

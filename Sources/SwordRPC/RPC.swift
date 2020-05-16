@@ -132,10 +132,11 @@ extension SwordRPC {
   }
     
   func disconnect(code: Int, message: String) {
-    guard self.socket?.isConnected ?? false else { return }
+    guard isConnected else { return }
     self.socket?.close()
     self.disconnectHandler?(self, code, message)
     self.delegate?.swordRPCDidDisconnect(self, code: code, message: message)
+    createSocket()
   }
 
   func handlePayload(_ op: OP, _ json: Data) {

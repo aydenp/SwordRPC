@@ -87,6 +87,10 @@ public class SwordRPC {
 
     print("[SwordRPC] Discord not detected")
   }
+    
+  public var isConnected: Bool {
+    return socket?.isConnected ?? false
+  }
 
   public func setPresence(_ presence: RichPresence) {
     self.presence = presence

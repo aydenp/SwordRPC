@@ -50,7 +50,12 @@ public class SwordRPC {
       label: "me.azoy.swordrpc.\(pid)",
       qos: .userInitiated
     )
-    self.encoder.dateEncodingStrategy = .secondsSince1970
+    // Apple's .secondsSince1970 implementation is not rounded, which Discord (and everyone else) doesn't like :/ (stackoverflow.com/a/49437052)
+    self.encoder.dateEncodingStrategy = .custom { (date, encoder) throws in
+        var container = encoder.singleValueContainer()
+        let seconds = UInt(date.timeIntervalSince1970)
+        try container.encode(seconds)
+    }
 
     self.createSocket()
 
